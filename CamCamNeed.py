@@ -1,7 +1,9 @@
 # -*- coding:utf-8 -*-
 # Author: 张来吃
-# Version: 1.0.0
+# Version: 1.0.1
 # Contact: laciechang@163.com
+
+# 2023.12.05 add Apple Log spec
 
 # -----------------------------------------------------
 # 本工具仅支持在达芬奇内运行 请将工具移至以下路径：
@@ -27,6 +29,7 @@ iVBORw0KGgoAAAANSUhEUgAAAIAAAAA2CAYAAAAPrZGjAAAEsmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAA
 """
 
 CAMERASPECIFIC = {
+    'Apple': {'colorspace': 'Apple Log / Rec. 2020', 'rawcodec': ''},
     'ARRI': {'colorspace': 'ARRI LogC3 / AWG', 'rawcodec':'ARRIRAW'},
     # 'ARRI': {'colorspace': 'ARRI LogC4 / AWG', 'rawcodec':'ARRIRAW'},
     'Canon':{'colorspace': 'Canon log2 / Cinema Gamut', 'rawcodec': 'Canon RAW'},
@@ -85,6 +88,7 @@ def getColorManagement():
     return scheme[mode]
 
 def getRaw(clip):
+    global CAMERASPECIFIC
     rawcodec = []
     for i in list(CAMERASPECIFIC.keys()):
         codec = CAMERASPECIFIC[i]['rawcodec']
@@ -99,8 +103,14 @@ def getRaw(clip):
         return False
 
 def getColorspace(clip):
+    global CAMERASPECIFIC
     camera = getCamera(clip)
-    return CAMERASPECIFIC[camera]['colorspace']
+    try:
+        output = CAMERASPECIFIC[camera]['colorspace']
+    except KeyError:
+        CAMERASPECIFIC[camera] = {'colorspace':'', 'rawcodec': ''}
+        output = ''
+    return output
 
 fu = bmd.scriptapp('Fusion')
 ui = fu.UIManager
